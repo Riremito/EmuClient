@@ -1,5 +1,6 @@
 #include"../Share/Simple/Simple.h"
 #include"../Share/Hook/SimpleHook.h"
+#include"MultiClient.h"
 
 bool GetDir2(std::wstring &wDir, HMODULE hDll) {
 	WCHAR wcDir[MAX_PATH] = { 0 };
@@ -78,6 +79,7 @@ bool EmuLoader(HMODULE hDll) {
 		}
 	}
 
+	EnableHook();
 	FastLoad();
 	return true;
 }

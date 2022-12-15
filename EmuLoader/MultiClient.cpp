@@ -40,3 +40,8 @@ HANDLE WINAPI CreateMutexExW_Hook(LPSECURITY_ATTRIBUTES lpMutexAttributes, LPCWS
 
 	return hRet;
 }
+
+bool EnableHook() {
+	SHook(CreateMutexExW);
+	return true;
+}
