@@ -64,7 +64,12 @@ bool EmuLoader(HMODULE hDll) {
 		conf.Read(FAST_LOAD, L"DLL_" + std::to_wstring(i), wDllName);
 
 		if (wDllName.length()) {
-			vFastLoadDlls.push_back(wLoaderDir + L"\\" + wDllName);
+			if (wDllName.find('\\') == std::wstring::npos) {
+				vFastLoadDlls.push_back(wLoaderDir + L"\\" + wDllName);
+			}
+			else {
+				vFastLoadDlls.push_back(wDllName);
+			}
 		}
 	}
 
@@ -75,7 +80,12 @@ bool EmuLoader(HMODULE hDll) {
 		conf.Read(DELAY_LOAD, L"DLL_" + std::to_wstring(i), wDllName);
 
 		if (wDllName.length()) {
-			vDelayLoadDlls.push_back(wLoaderDir + L"\\" + wDllName);
+			if (wDllName.find('\\') == std::wstring::npos) {
+				vDelayLoadDlls.push_back(wLoaderDir + L"\\" + wDllName);
+			}
+			else {
+				vDelayLoadDlls.push_back(wDllName);
+			}
 		}
 	}
 
