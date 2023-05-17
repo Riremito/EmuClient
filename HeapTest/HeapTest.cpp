@@ -42,10 +42,12 @@ BOOL WINAPI RtlFreeHeap_Hook(HANDLE hHeap, DWORD dwFlags, LPVOID lpMem) {
 
 int conf_HeapSize = 0;
 
+
+#define EXE_NAME L"RunEmu"
 #define DLL_NAME L"HeapTest"
 
 bool HeapTest(HMODULE hDll) {
-	Config conf(DLL_NAME".ini", hDll);
+	Config conf(EXE_NAME".ini", hDll);
 
 	std::wstring wHeapSize;
 	if (conf.Read(DLL_NAME, L"HeapSize", wHeapSize)) {

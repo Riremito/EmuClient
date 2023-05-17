@@ -38,6 +38,7 @@ void MemoryPatch() {
 }
 
 
+#define EXE_NAME L"RunEmu"
 #define DLL_NAME L"EmuExtra"
 
 void EmuExtra(HMODULE hDll) {

@@ -1,9 +1,12 @@
 #include"../Share/Simple/Simple.h"
 #include"../Share/Hook/SimpleHook.h"
 
+
 #ifndef _WIN64
+#define EXE_NAME L"RunEmu"
 #define DLL_NAME L"EmuLoader"
 #else
+#define EXE_NAME L"RunEmu64"
 #define DLL_NAME L"EmuLoader64"
 #endif
 
@@ -79,7 +82,7 @@ bool EnableHook() {
 }
 
 bool EmuLoader(HMODULE hDll) {
-	Config conf(DLL_NAME".ini", hDll);
+	Config conf(EXE_NAME".ini", hDll);
 	std::wstring wLoaderDir;
 
 	if (!GetDir(wLoaderDir, hDll)) {
