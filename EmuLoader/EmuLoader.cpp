@@ -1,25 +1,5 @@
 #include"../Share/Simple/Simple.h"
 #include"../Share/Hook/SimpleHook.h"
-#include"MultiClient.h"
-
-bool GetDir2(std::wstring &wDir, HMODULE hDll) {
-	WCHAR wcDir[MAX_PATH] = { 0 };
-
-	if (!GetModuleFileNameW(hDll, wcDir, _countof(wcDir))) {
-		return false;
-	}
-
-	std::wstring dir = wcDir;
-	size_t pos = dir.rfind(L"\\");
-
-	if (pos == std::wstring::npos) {
-		return false;
-	}
-
-	dir = dir.substr(0, pos + 1);
-	wDir = dir;
-	return true;
-}
 
 #ifndef _WIN64
 #define DLL_NAME L"EmuLoader"
@@ -29,6 +9,7 @@ bool GetDir2(std::wstring &wDir, HMODULE hDll) {
 
 #define FAST_LOAD L"FastLoad"
 #define DELAY_LOAD L"DelayLoad"
+#define MUTEX_MAPLE L"WvsClientMtx"
 
 std::vector<std::wstring> vFastLoadDlls;
 std::vector<std::wstring> vDelayLoadDlls;
@@ -36,7 +17,9 @@ std::vector<std::wstring> vDelayLoadDlls;
 // ÉÅÉÇÉäìWäJëOÇ…ì«Ç›çûÇﬁ
 bool FastLoad() {
 	for (size_t i = 0; i < vFastLoadDlls.size(); i++) {
-		LoadLibraryW(vFastLoadDlls[i].c_str());
+		if (LoadLibraryW(vFastLoadDlls[i].c_str())) {
+			DEBUG(L"FastLoad:" + vFastLoadDlls[i]);
+		}
 	}
 	return true;
 }
@@ -44,8 +27,54 @@ bool FastLoad() {
 // ÉÅÉÇÉäìWäJå„Ç…ì«Ç›çûÇﬁ
 bool DelayLoad() {
 	for (size_t i = 0; i < vDelayLoadDlls.size(); i++) {
-		LoadLibraryW(vDelayLoadDlls[i].c_str());
+		if (LoadLibraryW(vDelayLoadDlls[i].c_str())) {
+			DEBUG(L"DelayLoad:" + vDelayLoadDlls[i]);
+		}
 	}
+	return true;
+}
+
+bool IsMapleMutex(LPCWSTR lpName) {
+	if (!lpName) {
+		return false;
+	}
+
+	if (wcsstr(lpName, MUTEX_MAPLE)) {
+		return true;
+	}
+
+	return false;
+}
+
+bool CloseMutex(HANDLE hMutex) {
+	HANDLE hDuplicatedMutex = NULL;
+	if (DuplicateHandle(GetCurrentProcess(), hMutex, 0, &hDuplicatedMutex, 0, FALSE, DUPLICATE_CLOSE_SOURCE)) {
+		CloseHandle(hDuplicatedMutex);
+		DEBUG(L"MuliClient: Enabled");
+		return true;
+	}
+	return false;
+}
+
+decltype(CreateMutexExW) *_CreateMutexExW = NULL;
+HANDLE WINAPI CreateMutexExW_Hook(LPSECURITY_ATTRIBUTES lpMutexAttributes, LPCWSTR lpName, DWORD dwFlags, DWORD dwDesiredAccess) {
+	HANDLE hRet = _CreateMutexExW(lpMutexAttributes, lpName, dwFlags, dwDesiredAccess);
+
+	if (IsMapleMutex(lpName)) {
+		CloseMutex(hRet);
+		static bool bAlreadyLoaded = false;
+		if (!bAlreadyLoaded) {
+			bAlreadyLoaded = true;
+			// ÉÅÉÇÉäìWäJå„ÇÃéwíËDLLÇÃì«Ç›çûÇ›
+			DelayLoad();
+		}
+	}
+
+	return hRet;
+}
+
+bool EnableHook() {
+	SHook(CreateMutexExW);
 	return true;
 }
 
@@ -53,7 +82,7 @@ bool EmuLoader(HMODULE hDll) {
 	Config conf(DLL_NAME".ini", hDll);
 	std::wstring wLoaderDir;
 
-	if (!GetDir2(wLoaderDir, hDll)) {
+	if (!GetDir(wLoaderDir, hDll)) {
 		return false;
 	}
 
