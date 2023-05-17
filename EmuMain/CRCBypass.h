@@ -6,5 +6,7 @@
 
 
 void CRCBypass(Rosemary &r);
+DWORD __stdcall GetBackup(DWORD dwAddress);
+bool CRCBypass334(Rosemary &r);
 
 #endif

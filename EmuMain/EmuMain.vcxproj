@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CRCBypass.cpp" />
+    <ClCompile Include="CRCBypass334.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="EmuMain.cpp" />
   </ItemGroup>
