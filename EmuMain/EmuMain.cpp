@@ -1,5 +1,6 @@
 #include"EmuMain.h"
 #include"AobList.h"
+#include"RemoveCRC.h"
 #include"CRCBypass.h"
 
 
@@ -62,7 +63,9 @@ void FixClient(Rosemary &r) {
 void EmuMain() {
 	Rosemary r;
 
-	CRCBypass(r);
+	if (!RemoveCRC(r)) {
+		CRCBypass(r);
+	}
 	RemoveHackShield(r);
 	FixClient(r);
 }

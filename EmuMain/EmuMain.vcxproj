@@ -152,11 +152,13 @@
     <ClCompile Include="CRCBypass334.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="EmuMain.cpp" />
+    <ClCompile Include="RemoveCRC.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AobList.h" />
     <ClInclude Include="CRCBypass.h" />
     <ClInclude Include="EmuMain.h" />
+    <ClInclude Include="RemoveCRC.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
