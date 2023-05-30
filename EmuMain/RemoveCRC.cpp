@@ -4,7 +4,7 @@
 
 ULONG_PTR uRun_Leave_VM = 0;
 void(__thiscall *_RenderFrame)(void *ecx);
-void __fastcall  RenderFrame_Hook(void *ecx, void *edx) {
+void __fastcall RenderFrame_Hook(void *ecx, void *edx) {
 	// push xxxxxxxx
 	// jmp xxxxxxxx
 	if (((BYTE *)_ReturnAddress())[0] == 0x68 && ((BYTE *)_ReturnAddress())[5] == 0xE9) {

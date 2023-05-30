@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\RunEmu\RunEmu.cpp">
+    <ClCompile Include="EmuExtra_v20.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

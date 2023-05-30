@@ -4,6 +4,38 @@
 #include<Windows.h>
 #include<string>
 
+// RemoveCRC
+std::wstring AOB_RenderFrame[] = {
+	// v186.1
+	L"56 8B ?? 8B ?? 57 56 FF ?? 1C 8B ?? 85 ?? 7D 0C 68 ?? ?? ?? ?? 56 57 E8 ?? ?? ?? ?? 8B C7 5F 5E C3",
+	// v188.0
+	L"56 57 8B F9 8B 07 8B 48 1C 57 FF D1 8B F0 85 F6 7D 0E 68 ?? ?? ?? ?? 57 56 E8 ?? ?? ?? ?? 8B C6 5F 5E C3",
+};
+
+
+std::wstring AOB_Run_Leave_VM[] = {
+	// v186.1
+	L"6A 01 FF 15 ?? ?? ?? ?? 8B 45 08 83 38 00 75",
+	// v188.0
+	L"6A 01 FF 15 ?? ?? ?? ?? 8B 55 08 83 3A 00 75",
+};
+
+
+ULONG_PTR Offset_OnEnterField_Enter_VM[] = {
+	0x14,
+};
+
+std::wstring AOB_OnEnterField[] = {
+	// v188.0
+	L"55 8B EC 83 EC 40 53 56 57 89 4D C8 8B 4D C8 E8 ?? ?? ?? ?? E9",
+};
+
+std::wstring AOB_OnEnterField_Leave_VM[] = {
+	// v188.0
+	L"E8 ?? ?? ?? ?? 85 C0 74 ?? E8 ?? ?? ?? ?? 89 45 E8 83 7D E8 00 74",
+};
+
+
 // RemoveHackShield
 std::wstring AOB_HackShield_Init[] = {
 	// v164.0
