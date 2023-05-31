@@ -1,6 +1,54 @@
 #include"../Share/Simple/Simple.h"
 #include"../Share/Hook/SimpleHook.h"
 
+#pragma pack(push, 1)
+// JMS v20
+typedef struct {
+	BYTE unk1[0x70];
+	void *Platform; // 0x70
+	BYTE unk2[0x2C];
+	DWORD JumpFlag; // 0xA0
+} MapleCharacterObject;
+
+typedef struct {
+	BYTE unk1[0x3C];
+	MapleCharacterObject * Object; // 0x3C
+	BYTE unk2[0x3A0];
+	int X; // 0x3E0
+	int Y; // 0x3E4
+	/*
+	struct Teleport {
+		int toggle; // 0x3F8
+		int x; // 0x400
+		int y; // 0x404
+	};
+	*/
+} MapleCharacter;
+#pragma pack(pop)
+
+MapleCharacter **MyCharacter = (decltype(MyCharacter))0x0065F40C;
+void(__stdcall *_TeleportObject)(MapleCharacterObject *, int X, int Y) = (decltype(_TeleportObject))0x005B17A0;
+WCHAR *JumpSoundName = (decltype(JumpSoundName))0x0065B91C;
+void (*_PlaySound)(WCHAR *, int) = (decltype(_PlaySound))0x00599380;
+
+void (__thiscall *_MoveCharacter)(MapleCharacterObject *, DWORD) = NULL;
+void __fastcall MoveCharacter_Hook(MapleCharacterObject *Object, void *edx, DWORD dwCommand) {
+	if (Object->JumpFlag && Object->Platform) {
+		// DOWN ARROW key, Key Down
+		if (GetAsyncKeyState(VK_DOWN) & 0x8000) {
+			MapleCharacter *character = (MapleCharacter *)(*(DWORD *)0x0065F40C);
+			if (character) {
+				Object->JumpFlag = 0; // clear flag
+				_PlaySound(JumpSoundName, 100); // jump SE
+				_TeleportObject(Object, character->X, character->Y + 5); // teleport
+				return; // do not call original
+			}
+		}
+	}
+	// original
+	_MoveCharacter(Object, dwCommand);
+}
+
 void MemoryPatch() {
 	Rosemary r;
 
@@ -35,6 +83,8 @@ void MemoryPatch() {
 	// Fix Pets
 	// Fix Messengers
 
+	// Add Jump Down
+	SHookFunction(MoveCharacter, 0x005ACBF0);
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
