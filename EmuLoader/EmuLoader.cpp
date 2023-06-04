@@ -28,12 +28,19 @@ bool FastLoad() {
 }
 
 // ƒƒ‚ƒŠ“WŠJŒã‚É“Ç‚İ‚Ş
+bool bAlreadyLoaded = false;
 bool DelayLoad() {
+	if (bAlreadyLoaded) {
+		return false;
+	}
+
+	bAlreadyLoaded = true;
 	for (size_t i = 0; i < vDelayLoadDlls.size(); i++) {
 		if (LoadLibraryW(vDelayLoadDlls[i].c_str())) {
 			DEBUG(L"DelayLoad:" + vDelayLoadDlls[i]);
 		}
 	}
+
 	return true;
 }
 
@@ -65,10 +72,8 @@ HANDLE WINAPI CreateMutexExW_Hook(LPSECURITY_ATTRIBUTES lpMutexAttributes, LPCWS
 
 	if (IsMapleMutex(lpName)) {
 		CloseMutex(hRet);
-		static bool bAlreadyLoaded = false;
 		if (!bAlreadyLoaded) {
-			bAlreadyLoaded = true;
-			// ƒƒ‚ƒŠ“WŠJŒã‚Ìw’èDLL‚Ì“Ç‚İ‚İ
+			DEBUG(L"DelayLoad CreateMutexExW");
 			DelayLoad();
 		}
 	}
@@ -76,8 +81,22 @@ HANDLE WINAPI CreateMutexExW_Hook(LPSECURITY_ATTRIBUTES lpMutexAttributes, LPCWS
 	return hRet;
 }
 
+decltype(RegCreateKeyExA) *_RegCreateKeyExA = NULL;
+LSTATUS APIENTRY RegCreateKeyExA_Hook(HKEY hKey, LPCSTR lpSubKey, DWORD Reserved, LPSTR lpClass, DWORD dwOptions, REGSAM samDesired, LPSECURITY_ATTRIBUTES lpSecurityAttributes, PHKEY phkResult, LPDWORD lpdwDisposition) {
+	if (!bAlreadyLoaded) {
+		if (lpSubKey && strstr(lpSubKey, "SOFTWARE\\Wizet\\Maple")) {
+			DEBUG(L"DelayLoad RegCreateKeyExA");
+			DelayLoad();
+		}
+	}
+	return _RegCreateKeyExA(hKey, lpSubKey, Reserved, lpClass, dwOptions, samDesired, lpSecurityAttributes, phkResult, lpdwDisposition);
+}
+
+
 bool EnableHook() {
 	SHook(CreateMutexExW);
+	// v334.2
+	SHook(RegCreateKeyExA);
 	return true;
 }
 

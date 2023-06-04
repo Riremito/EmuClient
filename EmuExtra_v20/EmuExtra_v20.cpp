@@ -33,10 +33,10 @@ void (*_PlaySound)(WCHAR *, int) = (decltype(_PlaySound))0x00599380;
 
 void (__thiscall *_MoveCharacter)(MapleCharacterObject *, DWORD) = NULL;
 void __fastcall MoveCharacter_Hook(MapleCharacterObject *Object, void *edx, DWORD dwCommand) {
-	if (Object->JumpFlag && Object->Platform) {
+	MapleCharacter *character = (MapleCharacter *)(*(DWORD *)0x0065F40C);
+	if (character->Object == Object && Object->JumpFlag && Object->Platform) {
 		// DOWN ARROW key, Key Down
 		if (GetAsyncKeyState(VK_DOWN) & 0x8000) {
-			MapleCharacter *character = (MapleCharacter *)(*(DWORD *)0x0065F40C);
 			if (character) {
 				Object->JumpFlag = 0; // clear flag
 				_PlaySound(JumpSoundName, 100); // jump SE

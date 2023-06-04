@@ -39,7 +39,6 @@ bool AobListScan(Rosemary &r, ULONG_PTR &result, std::wstring aob[], size_t coun
 
 void RemoveHackShield(Rosemary &r) {
 	int iWorkingAob = 0; // do not change name
-
 	PATCHDEBUG(HackShield_Init, L"31 C0 C2 04 00");
 	PATCHDEBUG(EHSvc_Loader_1, L"31 C0 C2 10 03");
 	PATCHDEBUG(EHSvc_Loader_2, L"31 C0 C2 18 00");
@@ -48,7 +47,23 @@ void RemoveHackShield(Rosemary &r) {
 	PATCHDEBUG(Autoup, L"31 C0 C3");
 	PATCHDEBUG(ASPLunchr, L"31 C0 C3");
 	PATCHDEBUG(HSUpdate, L"31 C0 C3");
+}
 
+bool RemoveHS_TaiwanVer(Rosemary &r) {
+	int iWorkingAob = 0;
+	// GOD ë‰òpêl METHOD
+	ULONG_PTR uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveHS[0]);
+
+	SCANRES(uCSecurityClient__IsInstantiated);
+	if (!uCSecurityClient__IsInstantiated) {
+		return false;
+	}
+
+	r.Patch(uCSecurityClient__IsInstantiated, L"31 C0 C3");
+	PATCHDEBUG(StartKeyCrypt, L"31 C0 C3");
+	PATCHDEBUG(StartKeyCrypt, L"31 C0 C3");
+	PATCHDEBUG(StopKeyCrypt, L"31 C0 C3");
+	return true;
 }
 
 void FixClient(Rosemary &r) {
@@ -60,12 +75,24 @@ void FixClient(Rosemary &r) {
 	PATCHDEBUG(Ad, L"B8 01 00 00 00 C3");
 }
 
+// Hardware BreakPoint Detection
+void Disable_AntiDebug(Rosemary &r) {
+	int iWorkingAob = 0;
+
+	PATCHDEBUG(DR_Check, L"31 C0 C3");
+}
+
 void EmuMain() {
 	Rosemary r;
 
 	if (!RemoveCRC(r)) {
 		CRCBypass(r);
 	}
-	RemoveHackShield(r);
+
+	if (!RemoveHS_TaiwanVer(r)) {
+		RemoveHackShield(r);
+	}
+
+	Disable_AntiDebug(r);
 	FixClient(r);
 }
