@@ -1,29 +1,7 @@
 #include"SupportUTF8.h"
-#include<intrin.h>
-#pragma intrinsic(_ReturnAddress)
 
-#define HOOKDEBUG(func) \
-{\
-	ListScan(r, u##func, AOB_##func, _countof(AOB_##func), iWorkingAob);\
-	DEBUG(L""#func" = " + QWORDtoString(u##func) + L", Aob = " + std::to_wstring(iWorkingAob));\
-	if (iWorkingAob > -1) {\
-		SHookFunction(func, u##func);\
-	}\
-}
-
-bool ListScan(Rosemary &r, ULONG_PTR &result, std::wstring aob[], size_t count, int &used) {
-	result = 0; // scan result
-	used = -1; // which aob is used
-	for (size_t i = 0; i < count; i++) {
-		result = r.Scan(aob[i]);
-		if (result) {
-			used = (int)i;
-			return true;
-		}
-	}
-	return false;
-}
-
+// Client deafult code page
+#define CLIENT_CODEPAGE 932 // JMS
 // SJIStoUTF8 calls these apis
 decltype(MultiByteToWideChar) *_MultiByteToWideChar = 0;
 decltype(WideCharToMultiByte) *_WideCharToMultiByte = 0;
@@ -34,13 +12,13 @@ bool SJIStoUTF8(BYTE *input, std::string &output, int input_size = 0) {
 		input_size = *(int *)((DWORD)input - 0x04);
 	}
 	// sjis to utf16
-	int new_length = _MultiByteToWideChar(932, 0, (char *)input, input_size, 0, 0);
+	int new_length = _MultiByteToWideChar(CLIENT_CODEPAGE, 0, (char *)input, input_size, 0, 0);
 	if (!new_length) {
 		return false;
 	}
 
 	std::vector<WORD> w(new_length + 1);
-	if (!_MultiByteToWideChar(932, 0, (char *)input, input_size, (WCHAR *)&w[0], new_length)) {
+	if (!_MultiByteToWideChar(CLIENT_CODEPAGE, 0, (char *)input, input_size, (WCHAR *)&w[0], new_length)) {
 		return false;
 	}
 
@@ -66,21 +44,15 @@ bool SJIStoUTF8(BYTE *input, std::string &output, int input_size = 0) {
 	return true;
 }
 
-typedef void(__fastcall* ZXString_char__Assign_t)(void* pThis, void* edx, const char* s, int n);
-// v186.1
-auto ZXString_char__Assign = reinterpret_cast<ZXString_char__Assign_t>(0x00419946); // ZXString<char>::Assign(char const *,int)
-
-
-// 8B 86 ?? ?? ?? ?? 0F BE 00 6A 04
-ULONG_PTR (__thiscall *_GetString)(void *ecx, char **v1, void *v2, void *v3);
-ULONG_PTR  __fastcall GetString_Hook(void *ecx, void *edx, char **v1, void *v2, void *v3) {
-	ULONG_PTR uRet = _GetString(ecx, v1, v2, v3);
+void (__thiscall *ZXString_char__Assign)(void *, char*, int) = NULL;
+ULONG_PTR (__thiscall *_StringPool__GetString)(void *ecx, char **v1, void *v2, void *v3);
+ULONG_PTR  __fastcall StringPool__GetString_Hook(void *ecx, void *edx, char **v1, void *v2, void *v3) {
+	ULONG_PTR uRet = _StringPool__GetString(ecx, v1, v2, v3);
 
 
 	std::string utf8;
 	if (SJIStoUTF8((BYTE *)*v1, utf8)) {
-		//DEBUG(DatatoString((BYTE *)utf8.c_str(), utf8.size(), true));
-		ZXString_char__Assign(v1, edx, (char *)utf8.c_str(), utf8.size());
+		ZXString_char__Assign(v1, (char *)utf8.c_str(), utf8.size());
 	}
 
 	return uRet;
@@ -116,8 +88,19 @@ bool SupportUTF8() {
 	SCANRES(uCodePageCheck);
 	*/
 
-	ULONG_PTR uGetString = 0x008723EC; // v186.1
-	SHookFunction(GetString, uGetString);
+
+	// Aob
+	// StringPool__GetString
+	// 8B 86 ?? ?? ?? ?? 0F BE 00 6A 04
+	// ZXString_char__Assign
+	// ??
+	// v186.1
+	ZXString_char__Assign = (decltype(ZXString_char__Assign))0x00419946;
+	SHookFunction(StringPool__GetString, 0x008723EC);
+	// v207 test
+	//ZXString_char__Assign = (decltype(ZXString_char__Assign))0x0042FC10;
+	//SHookFunction(StringPool__GetString, 0x0087CF40 + *(signed long int *)(0x0087CF40 + 0x01) + 0x05); X
+	//SHookFunction(StringPool__GetString, 0x0087CF40);
 
 	
 	SHook(MultiByteToWideChar);
