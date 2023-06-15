@@ -31,6 +31,9 @@ void MemoryPatch() {
 	int iWorkingAob = 0; // do not change name
 
 	//DEBUG(L"MemoryPatch ver " +  std::to_wstring(conf_MapleVersion));
+	// /+message is enabled
+	PATCHDEBUG(GMCommand, L"B8 01 00 00 00 90");
+	PATCHDEBUG(MapCommand, L"90 90 90 90 90 90 90 90");
 	PATCHDEBUG(GMChat, L"B8 01 00 00 00");
 	PATCHDEBUG(MapDropLimit, L"B8 00 00 00 00 90 90 90 90 90 90");
 	PATCHDEBUG(PointItemDropLimit, L"EB 2D 90 90 90 90");

@@ -89,9 +89,14 @@ void EmuMain() {
 		CRCBypass(r);
 	}
 
+	/*
 	if (!RemoveHS_TaiwanVer(r)) {
 		RemoveHackShield(r);
 	}
+	*/
+	RemoveHS_TaiwanVer(r);
+	RemoveHackShield(r);
+
 
 	Disable_AntiDebug(r);
 	FixClient(r);
