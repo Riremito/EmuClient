@@ -15,6 +15,16 @@ void __fastcall RenderFrame_Hook(void *ecx, void *edx) {
 			return _RenderFrame(ecx);
 		}
 
+		// MSEA v102 jmp vmed, vmed: jmp RenderFrame
+		// 00B975B5 - call 004172E2 // RederFrame
+		// 004172E2 - jmp 0083C5F0 // wtf
+		if (((BYTE *)call_function)[0x00] == 0xE9) {
+			call_function = call_function + *(signed long *)&((BYTE *)call_function)[1] + 0x05;
+			if (call_function == uRenderFrame) {
+				return _RenderFrame(ecx);
+			}
+		}
+
 	}
 	// CWvsApp::Run MSCRC
 	*(ULONG_PTR *)_AddressOfReturnAddress() = uRun_Leave_VM;
@@ -28,13 +38,21 @@ bool RemoveCRC_Run(Rosemary &r) {
 	uRenderFrame = r.Scan(L"56 57 8B F9 8B 07 8B 48 1C 57 FF D1 8B F0 85 F6 7D 0E 68 ?? ?? ?? ?? 57 56 E8 ?? ?? ?? ?? 8B C6 5F 5E C3");
 
 	if (!uRenderFrame) {
-		return false;
+		// MSEA v102
+		uRenderFrame = r.Scan(L"56 57 8B F9 8B 07 8B 48 1C");
+		if (!uRenderFrame) {
+			return false;
+		}
 	}
 
 	uRun_Leave_VM = r.Scan(L"6A 01 FF 15 ?? ?? ?? ?? 8B 55 08 83 3A 00 75");
 
 	if (!uRun_Leave_VM) {
-		return false;
+		// MSEA v102
+		uRun_Leave_VM = r.Scan(L"6A 01 FF 15 ?? ?? ?? ?? 8B 4D 08 83 39 00 75");
+		if (!uRun_Leave_VM) {
+			return false;
+		}
 	}
 
 	SHookFunction(RenderFrame, uRenderFrame);

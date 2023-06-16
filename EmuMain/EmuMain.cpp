@@ -51,7 +51,6 @@ void RemoveHackShield(Rosemary &r) {
 
 bool RemoveHS_TaiwanVer(Rosemary &r) {
 	int iWorkingAob = 0;
-	// GOD ë‰òpêl METHOD
 	ULONG_PTR uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveHS[0]);
 
 	SCANRES(uCSecurityClient__IsInstantiated);
@@ -89,11 +88,6 @@ void EmuMain() {
 		CRCBypass(r);
 	}
 
-	/*
-	if (!RemoveHS_TaiwanVer(r)) {
-		RemoveHackShield(r);
-	}
-	*/
 	RemoveHS_TaiwanVer(r);
 	RemoveHackShield(r);
 
