@@ -145,9 +145,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="StringPool.cpp" />
     <ClCompile Include="SupportUTF8.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StringPool.h" />
     <ClInclude Include="SupportUTF8.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

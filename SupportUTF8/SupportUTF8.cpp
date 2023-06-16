@@ -1,4 +1,5 @@
 #include"SupportUTF8.h"
+#include"StringPool.h"
 
 // Client deafult code page
 #define CLIENT_CODEPAGE 932 // JMS
@@ -45,13 +46,22 @@ bool SJIStoUTF8(BYTE *input, std::string &output, int input_size = 0) {
 }
 
 void (__thiscall *ZXString_char__Assign)(void *, char*, int) = NULL;
-ULONG_PTR (__thiscall *_StringPool__GetString)(void *ecx, char **v1, void *v2, void *v3);
-ULONG_PTR  __fastcall StringPool__GetString_Hook(void *ecx, void *edx, char **v1, void *v2, void *v3) {
-	ULONG_PTR uRet = _StringPool__GetString(ecx, v1, v2, v3);
-
+ULONG_PTR (__thiscall *_StringPool__GetString)(void *, char **, int, void *);
+ULONG_PTR  __fastcall StringPool__GetString_Hook(void *ecx, void *edx, char **v1, int index, void *v3) {
+	ULONG_PTR uRet = _StringPool__GetString(ecx, v1, index, v3);
 
 	std::string utf8;
 	if (SJIStoUTF8((BYTE *)*v1, utf8)) {
+		/*
+		for (auto &strtable : StringPoolTable) {
+			if (utf8.compare(strtable[0]) == 0) {
+				if (strtable[1].length()) {
+					utf8 = strtable[1];
+				}
+				break;
+			}
+		}
+		*/
 		ZXString_char__Assign(v1, (char *)utf8.c_str(), utf8.size());
 	}
 
@@ -66,6 +76,12 @@ int WINAPI MultiByteToWideChar_Hook(UINT CodePage, DWORD dwFlags, LPCCH lpMultiB
 int WINAPI WideCharToMultiByte_Hook(UINT CodePage, DWORD dwFlags, LPCWCH lpWideCharStr, int cchWideChar, LPSTR lpMultiByteStr, int cbMultiByte, LPCCH lpDefaultChar, LPBOOL lpUsedDefaultChar) {
 	CodePage = CP_UTF8;
 	return _WideCharToMultiByte(CodePage, dwFlags, lpWideCharStr, cchWideChar, lpMultiByteStr, cbMultiByte, lpDefaultChar, lpUsedDefaultChar);
+}
+
+decltype(GetClipboardData) *_GetClipboardData = NULL;
+HANDLE WINAPI GetClipboardData_Hook(UINT uFormat) {
+	// CF_TEXT -> CF_OEMTEXT
+	return _GetClipboardData(CF_OEMTEXT);
 }
 
 bool SupportUTF8() {
@@ -105,5 +121,8 @@ bool SupportUTF8() {
 	
 	SHook(MultiByteToWideChar);
 	SHook(WideCharToMultiByte);
+	SHook(GetClipboardData);
+
+	InitStringPool();
 	return true;
 }
