@@ -37,8 +37,10 @@ std::wstring AOB_OnEnterField_Leave_VM[] = {
 
 // DR_Check
 std::wstring AOB_DR_Check[] = {
-	// v331.0
+	// v331.0, vmp
 	L"55 8B EC 81 EC F0 02 00 00 A1 ?? ?? ?? ?? 33 C5 89 45 FC 53 56 57 6A 00 E9",
+	// MSEA v102
+	L"55 8B EC 81 EC ?? ?? ?? ?? A1 ?? ?? ?? ?? 33 C5 89 45 FC 53 56 57 E9",
 };
 
 

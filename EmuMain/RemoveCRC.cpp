@@ -19,7 +19,7 @@ void __fastcall RenderFrame_Hook(void *ecx, void *edx) {
 		// 00B975B5 - call 004172E2 // RederFrame
 		// 004172E2 - jmp 0083C5F0 // wtf
 		if (((BYTE *)call_function)[0x00] == 0xE9) {
-			call_function = call_function + *(signed long *)&((BYTE *)call_function)[1] + 0x05;
+			call_function = call_function + *(signed long *)&((BYTE *)call_function)[0x01] + 0x05;
 			if (call_function == uRenderFrame) {
 				return _RenderFrame(ecx);
 			}
@@ -101,11 +101,23 @@ bool RemoveCRC_v334(Rosemary &r) {
 }
 
 bool RemoveCRC(Rosemary &r) {
-	bool check = true;
-	check &= RemoveCRC_Run(r);
-	if (check && RemoveCRC_v334(r)) {
-		return true;
+	int check = 0;
+
+	if (RemoveCRC_Run(r)) {
+		check++;
 	}
-	check &= RemoveCRC_OnEnterField(r);
-	return check;
+
+	if (RemoveCRC_v334(r)) {
+		check++;
+	}
+
+	if (RemoveCRC_OnEnterField(r)) {
+		check++;
+	}
+
+	if (!check) {
+		return false;
+	}
+
+	return true;
 }

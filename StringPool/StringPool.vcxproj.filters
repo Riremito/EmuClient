@@ -18,12 +18,12 @@
     <ClCompile Include="DllMain.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="SupportUTF8.cpp">
+    <ClCompile Include="StringPool.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SupportUTF8.h">
+    <ClInclude Include="StringPool.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
