@@ -81,6 +81,27 @@ bool RemoveCRC_OnEnterField(Rosemary &r) {
 	return true;
 }
 
+bool RemoveCRC_OnEnterField_194(Rosemary &r) {
+	// v194.0 CWvsContext::OnEnterField
+	ULONG_PTR uOnEnterField = r.Scan(L"55 8B EC 6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 83 EC ?? 53 56 57 A1 ?? ?? ?? ?? 33 C5 50 8D 45 F4 64 A3 00 00 00 00 89 4D ?? 8B 4D ?? E8 ?? ?? ?? ?? 6A 28 8B 4D ?? E8 ?? ?? ?? ?? E9");
+
+	if (!uOnEnterField) {
+		return false;
+	}
+
+	ULONG_PTR uOnEnterField_Enter_VM = uOnEnterField + 0x3D;
+	ULONG_PTR uOnEnterField_Leave_VM = r.Scan(L"89 ?? 89 ?? 89 ?? 90 E8 ?? ?? ?? ?? 89 45 ?? E8 ?? ?? ?? ?? 85 C0 74");
+
+	if (!uOnEnterField_Leave_VM) {
+		return false;
+	}
+
+	r.JMP(uOnEnterField_Enter_VM, uOnEnterField_Leave_VM);
+	DEBUG(L"RemoveCRC_OnEnterField (v194): " + DWORDtoString(uOnEnterField_Enter_VM) + L" -> " + DWORDtoString(uOnEnterField_Leave_VM));
+	return true;
+}
+
+
 bool RemoveCRC_v334(Rosemary &r) {
 	ULONG_PTR uOnSomething = r.Scan(L"55 8B EC 6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 81 EC ?? ?? ?? ?? 53 56 57 A1 ?? ?? ?? ?? 33 C5 50 8D 45 F4 64 A3 00 00 00 00 89 8D ?? ?? ?? ?? C7 45 BC 00 00 00 00 33 C0 89 45 C0 89 45 C4 89 45 C8 89 45 CC 89 45 D0 89 45 D4 C7 45 B0 00 00 00 00 33 C9 89 4D B4 89 4D B8 E8");
 
@@ -113,6 +134,11 @@ bool RemoveCRC(Rosemary &r) {
 
 	if (RemoveCRC_OnEnterField(r)) {
 		check++;
+	}
+	else {
+		if (RemoveCRC_OnEnterField_194(r)) {
+			check++;
+		}
 	}
 
 	if (!check) {
