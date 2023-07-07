@@ -150,6 +150,13 @@ std::wstring AOB_StopKeyCrypt[] = {
 	L"56 8B ?? 57 8D ?? 38 8B ?? E8 ?? ?? ?? ?? 85 ?? 74 1F 8B",
 };
 
+
+
+std::wstring AOB_MapleNetwork[] = {
+	// v194.0
+	L"6A FF 68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 53 56 A1 ?? ?? ?? ?? 33 C4 50 8D 44 24 ?? 64 A3 00 00 00 00 8B F1 8A 5C 24 ?? 8A 44 24 ?? 88 5E ?? 88 46 ?? 80 FB 01 75",
+};
+
 // FixClient
 std::wstring AOB_WindowMode_PreBB[] = {
 	// v164.0

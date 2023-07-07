@@ -46,6 +46,8 @@ void FixClient(Rosemary &r) {
 	AOBPatch(WindowMode_PostBB, L"31 C0 C3");
 	AOBPatch(Launcher, L"B8 01 00 00 00 C3");
 	AOBPatch(Ad, L"B8 01 00 00 00 C3");
+	// v194.0 has System Settings causes crash without using this code
+	AOBPatch(MapleNetwork, L"31 C0 C2 08 00");
 }
 
 // Hardware BreakPoint Detection
