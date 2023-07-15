@@ -109,13 +109,13 @@ void __declspec(naked) CRCBypass187() {
 		lea edi, [esi + ecx * 4]
 		push edi
 		call GetBackup
-		mov ecx, eax // ecx‚É•K—v‚ÈƒAƒhƒŒƒX‚ğ“ü‚ê‚é
+		mov ecx, eax // ecxã«å¿…è¦ãªã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å…¥ã‚Œã‚‹
 		pop edi
 		pop esi
 		pop ebx
 		pop edx
 		pop eax
-		xor eax, [ecx] // ecx•Û‘¶•s—v
+		xor eax, [ecx] // ecxä¿å­˜ä¸è¦
 		and eax, 0x000000FF
 		jmp uMSCRC1_Ret
 	}
@@ -139,7 +139,7 @@ DWORD __stdcall GetBackup188(DWORD dwAddress) {
 		((uMSCRC_add_al_pecx - 0x20) < dwAddress && dwAddress < (uMSCRC_add_al_pecx + 0x20)) ||
 		// MSCRC3
 		((uMSCRC_push_pedx - 0x20) < dwAddress && dwAddress < (uMSCRC_push_pedx + 0x20)) ||
-		// ”ÍˆÍw’è‚ª“ï‚µ‚¢‚Ì‚ÅMSCRC1‚æ‚è‘O‚È‚ç‘S•”ŠÄ‹‘ÎÛ‚Æ”»’f, SendPacket“™“Á’è‚ÌŠÖ”‚ªŠÄ‹‚³‚ê‚Ä‚¢‚é
+		// ç¯„å›²æŒ‡å®šãŒé›£ã—ã„ã®ã§MSCRC1ã‚ˆã‚Šå‰ãªã‚‰å…¨éƒ¨ç›£è¦–å¯¾è±¡ã¨åˆ¤æ–­, SendPacketç­‰ç‰¹å®šã®é–¢æ•°ãŒç›£è¦–ã•ã‚Œã¦ã„ã‚‹
 		((DWORD)vSection[0].BaseAddress < dwAddress && dwAddress < uMSCRC1)
 		)
 	{
@@ -156,7 +156,7 @@ DWORD __stdcall GetBackup188(DWORD dwAddress) {
 
 void __declspec(naked) CRCBypass188_push_pedx() {
 	__asm {
-		push [edx] // ‚Æ‚è‚ ‚¦‚¸push
+		push [edx] // ã¨ã‚Šã‚ãˆãšpush
 		push eax
 		push ebx
 		push ecx
@@ -168,7 +168,7 @@ void __declspec(naked) CRCBypass188_push_pedx() {
 		push edx
 		call GetBackup188
 		mov eax,dword ptr [eax]
-		mov dword ptr [esp+0x1C], eax // push‚µ‚½‚à‚Ì‚ğŒã‚©‚ç‘‚«Š·‚¦‚é
+		mov dword ptr [esp+0x1C], eax // pushã—ãŸã‚‚ã®ã‚’å¾Œã‹ã‚‰æ›¸ãæ›ãˆã‚‹
 
 		pop ebp
 		pop edi
@@ -193,7 +193,7 @@ void __declspec(naked) CRCBypass188_add_al_pecx() {
 		// address check
 		push ecx
 		call GetBackup
-		mov ecx, eax // ecx‚É•K—v‚ÈƒAƒhƒŒƒX‚ğ“ü‚ê‚é
+		mov ecx, eax // ecxã«å¿…è¦ãªã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å…¥ã‚Œã‚‹
 		// restore reg
 		pop ebp
 		pop edi
@@ -201,7 +201,7 @@ void __declspec(naked) CRCBypass188_add_al_pecx() {
 		pop ebx
 		pop edx
 		pop eax
-		add al, [ecx] // ecx •Û‘¶•s—v
+		add al, [ecx] // ecx ä¿å­˜ä¸è¦
 		pop ecx
 		push edx
 		mov dh, 0xAB
@@ -238,7 +238,7 @@ void CRCBypass(Rosemary &r) {
 		} while (uLoginCRC);
 	}
 	else {
-		// v187.0‚¾‚Æ•Ê‚ÌƒAƒhƒŒƒX‚ªƒqƒbƒg‚µ‚Ä‚µ‚Ü‚¤‚Ì‚Åv187.0‚ğ—Dæ‚µ‚Äˆ—‚·‚é
+		// v187.0ã ã¨åˆ¥ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ãŒãƒ’ãƒƒãƒˆã—ã¦ã—ã¾ã†ã®ã§v187.0ã‚’å„ªå…ˆã—ã¦å‡¦ç†ã™ã‚‹
 		// 0x0098A486 v176.0
 		uMSCRC1 = r.Scan(L"0F B6 3C 1F 8B DA 23 DE 33 FB 8B 3C BD");
 		if (uMSCRC1) {
