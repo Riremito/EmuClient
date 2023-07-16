@@ -22,30 +22,40 @@ void RemoveHackShield(Rosemary &r) {
 // but it disables HackShield
 // if you get crash with this code, you should check MSCRC
 // there are some CRCs that checks only certain function memory, CSecurityClient__IsInstantiated is scaned by the CRC
-bool RemoveHS_EasyVer(Rosemary &r) {
-	ULONG_PTR uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveHS[0]);
+bool RemoveAntiCheat_EasyVer(Rosemary &r) {
+	ULONG_PTR Call = r.Scan(L"E8 ?? ?? ?? ?? 85 C0 74 0A E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 ?? ?? 00 0F");//HS
+	ULONG_PTR uCSecurityClient__IsInstantiated = Call + 0x05 + *(signed long int*)(Call + 0x01);
+	if (!Call) {
+		Call = r.Scan(L"83 ?? ?? ?? ?? ?? 00 0F 95 C0 C3 A1 ?? ?? ?? ?? C3 8B 01 8B");//XIGNCODE
+		uCSecurityClient__IsInstantiated = Call + 0x05 + *(signed long int*)(Call + 0x01);
+		if (!Call) return false;
+	}
+
+/*	ULONG_PTR uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveHS[0]);
 
 	if (!uCSecurityClient__IsInstantiated) {
 		uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveHS[1]);
 
 		if (!uCSecurityClient__IsInstantiated) return false;
-	}
+	}*/
 
 	SCANRES(uCSecurityClient__IsInstantiated);
-
 	r.Patch(uCSecurityClient__IsInstantiated, L"31 C0 C3");
+
 	//AOBPatch(EasyRemoveHS, L"31 C0 C3");
 
-	AOBPatch(StartKeyCrypt, L"31 C0 C3");
-	AOBPatch(StopKeyCrypt, L"31 C0 C3");
+	ULONG_PTR uKeyCryptCall = r.Scan(L"E8 ?? ?? ?? ?? EB 05 E8 ?? ?? ?? ?? 66");
+	ULONG_PTR uStartKeyCrypt = uKeyCryptCall + 0x05 + *(signed long int*)(uKeyCryptCall + 0x01);
+	ULONG_PTR uStopKeyCrypt = uKeyCryptCall + 0x0C + *(signed long int*)(uKeyCryptCall + 0x08);
+	r.Patch(uStartKeyCrypt, L"31 C0 C3");
+	r.Patch(uStopKeyCrypt, L"31 C0 C3");
 
-	//TMS157.2 HS things check
+	//AOBPatch(StartKeyCrypt, L"31 C0 C3");
+	//AOBPatch(StopKeyCrypt, L"31 C0 C3");
+
+	//TMS157.2 HS things (when enter character select page)
 	ULONG_PTR uHS_things = r.Scan(L"83 ?? ?? ?? ?? ?? 00 74 45 83 ?? ?? 00 A1 ?? ?? ?? ?? FF ?? ?? ?? ?? ?? 8D ?? EC 68 ?? ?? ?? ?? 50 C6 ?? ?? 02 E8");
-	SCANRES(uHS_things);
-
-	if (uHS_things) {
-		r.JMP(uHS_things, uHS_things + 0x4E); //r.JMP(0x60ED4F, 0x60ED9D);
-	}
+	r.JMP(uHS_things, uHS_things + 0x4E); //r.JMP(0x60ED4F, 0x60ED9D);
 
 	return true;
 }
@@ -99,7 +109,7 @@ void EmuMain() {
 		break;
 	}
 	case MS_TWMS: {
-		RemoveHS_EasyVer(r);
+		RemoveAntiCheat_EasyVer(r);
 		Disable_AntiDebug(r);
 		FixClient(r);
 		// TMS old default DNS (not available cause crash)
