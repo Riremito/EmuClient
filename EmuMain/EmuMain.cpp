@@ -22,18 +22,27 @@ void RemoveHackShield(Rosemary &r) {
 // but it disables HackShield
 // if you get crash with this code, you should check MSCRC
 // there are some CRCs that checks only certain function memory, CSecurityClient__IsInstantiated is scaned by the CRC
-bool RemoveHS_TaiwanVer(Rosemary &r) {
+bool RemoveHS_EasyVer(Rosemary &r) {
 	ULONG_PTR uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveHS[0]);
 
-	SCANRES(uCSecurityClient__IsInstantiated);
 	if (!uCSecurityClient__IsInstantiated) {
-		return false;
+		uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveHS[1]);
+
+		if (!uCSecurityClient__IsInstantiated) return false;
 	}
 
+	SCANRES(uCSecurityClient__IsInstantiated);
+
 	r.Patch(uCSecurityClient__IsInstantiated, L"31 C0 C3");
-	AOBPatch(StartKeyCrypt, L"31 C0 C3");
+	//AOBPatch(EasyRemoveHS, L"31 C0 C3");
+
 	AOBPatch(StartKeyCrypt, L"31 C0 C3");
 	AOBPatch(StopKeyCrypt, L"31 C0 C3");
+
+	//TMS157.2 HS things check
+	ULONG_PTR uHS_things = r.Scan(L"83 ?? ?? ?? ?? ?? 00 74 45 83 ?? ?? 00 A1 ?? ?? ?? ?? FF ?? ?? ?? ?? ?? 8D ?? EC 68 ?? ?? ?? ?? 50 C6 ?? ?? 02 E8");
+	r.JMP(uHS_things, uHS_things + 0x4E); //r.JMP(0x60ED4F, 0x60ED9D);
+
 	return true;
 }
 
@@ -42,12 +51,16 @@ bool RemoveHS_TaiwanVer(Rosemary &r) {
 void FixClient(Rosemary &r) {
 	// JMS v186 or before
 	AOBPatch_ADD(WindowMode_PreBB, 0x03, L"00 00 00 00");
-	// JMS v187 only, later version of bigbang client has window mode option
-	AOBPatch(WindowMode_PostBB, L"31 C0 C3");
+	// JMS v187 only, later version of bigbang client has window mode option (it will cause TMS crash)
+	//AOBPatch(WindowMode_PostBB, L"31 C0 C3");
+
 	AOBPatch(Launcher, L"B8 01 00 00 00 C3");
 	AOBPatch(Ad, L"B8 01 00 00 00 C3");
 	// v194.0 has System Settings causes crash without using this code
 	AOBPatch(MapleNetwork, L"31 C0 C2 08 00");
+
+	// TMS old default DNS (not available cause crash)
+	r.StringPatch("tw.login.maplestory.gamania.com", "127.0.0.1");
 }
 
 // Hardware BreakPoint Detection
@@ -63,13 +76,15 @@ void EmuMain() {
 		CRCBypass(r);
 	}
 
-	//r.Patch(0x00454AEA, L"31 C0 C3"); // hide DLL v97
-	//r.Patch(0x004C1930, L"31 C0 C3"); // hide DLL v102
-	//r.Patch(0x00AB83A0, L"83 C4 14"); // MSCRC function
-	//r.JMP(0x00AB83A0 + 3, 0x00AB9C8F); // MSCRC function
+	//r.Patch(0x00454AEA, L"31 C0 C3"); // hide DLL MSEA v97
+	//r.Patch(0x004C1930, L"31 C0 C3"); // hide DLL MSEA v102
+	//r.Patch(0x00AB83A0, L"83 C4 14"); // MSEA v97 MSCRC function
+	//r.JMP(0x00AB83A0 + 3, 0x00AB9C8F); // MSEA v97 MSCRC function
 
-	//RemoveHS_TaiwanVer(r);
-	RemoveHackShield(r);
+	r.JMP(0xAC0A82, r.Scan(L"68 FF 00 00 00 6A 00 6A 00 8B ?? ?? ?? ?? ?? 83 ?? ?? ?? 6A 03 FF 15"));//TMS157.2 MSCRC ManipulatePacket
+
+	RemoveHS_EasyVer(r);
+	//RemoveHackShield(r);
 
 	Disable_AntiDebug(r);
 	FixClient(r);

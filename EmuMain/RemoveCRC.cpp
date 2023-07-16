@@ -38,21 +38,19 @@ bool RemoveCRC_Run(Rosemary &r) {
 	uRenderFrame = r.Scan(L"56 57 8B F9 8B 07 8B 48 1C 57 FF D1 8B F0 85 F6 7D 0E 68 ?? ?? ?? ?? 57 56 E8 ?? ?? ?? ?? 8B C6 5F 5E C3");
 
 	if (!uRenderFrame) {
-		// MSEA v102
 		uRenderFrame = r.Scan(L"56 57 8B F9 8B 07 8B 48 1C");
+
 		if (!uRenderFrame) {
-			return false;
+			uRenderFrame = r.Scan(L"56 8B F1 8B 06 57 56 FF 50 1C");
+
+			if (!uRenderFrame) return false;
 		}
 	}
 
-	uRun_Leave_VM = r.Scan(L"6A 01 FF 15 ?? ?? ?? ?? 8B 55 08 83 3A 00 75");
+	uRun_Leave_VM = r.Scan(L"6A 01 FF 15 ?? ?? ?? ?? 8B ?? 08 83 ?? 00 75");
 
 	if (!uRun_Leave_VM) {
-		// MSEA v102
-		uRun_Leave_VM = r.Scan(L"6A 01 FF 15 ?? ?? ?? ?? 8B 4D 08 83 39 00 75");
-		if (!uRun_Leave_VM) {
-			return false;
-		}
+		return false;
 	}
 
 	SHookFunction(RenderFrame, uRenderFrame);
