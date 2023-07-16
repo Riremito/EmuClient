@@ -1,4 +1,4 @@
-#include"CRCBypass.h"
+﻿#include"CRCBypass.h"
 
 std::vector<MEMORY_BASIC_INFORMATION> vSection;
 std::vector<void*> vBackup;

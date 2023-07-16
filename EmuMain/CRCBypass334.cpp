@@ -1,4 +1,4 @@
-#include"CRCBypass.h"
+﻿#include"CRCBypass.h"
 
 // v334.0 VMProtect CRC Bypass
 DWORD MSCRC1 = 0x015BCBD9;
