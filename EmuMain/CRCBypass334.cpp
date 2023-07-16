@@ -1,4 +1,4 @@
-#include"CRCBypass.h"
+ï»¿#include"CRCBypass.h"
 
 // v334.0 VMProtect CRC Bypass
 DWORD MSCRC1 = 0x015BCBD9;
@@ -18,7 +18,7 @@ DWORD VMCRC_Start = 0x00401000;
 DWORD VMCRC_End = 0x015BDBD9;
 
 DWORD __stdcall GetBackupVM(DWORD dwAddress) {
-	// ƒAƒhƒŒƒX‚Ì”ÍˆÍ‚ªSectionŠÛ‚²‚Æ‚¾‚Æ³í‚É“®‚©‚È‚¢(Section[0]‚Å‚àNG)
+	// ã‚¢ãƒ‰ãƒ¬ã‚¹ã®ç¯„å›²ãŒSectionä¸¸ã”ã¨ã ã¨æ­£å¸¸ã«å‹•ã‹ãªã„(Section[0]ã§ã‚‚NG)
 	if (VMCRC_Start <= dwAddress && dwAddress <= VMCRC_End) {
 		return GetBackupVM(dwAddress);
 	}
