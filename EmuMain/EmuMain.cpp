@@ -22,10 +22,6 @@ void RemoveHackShield(Rosemary &r) {
 // but it disables HackShield
 // if you get crash with this code, you should check MSCRC
 // there are some CRCs that checks only certain function memory, CSecurityClient__IsInstantiated is scaned by the CRC
-<<<<<<< Updated upstream
-bool RemoveHS_EasyVer(Rosemary &r) {
-	ULONG_PTR uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveHS[0]);
-=======
 bool RemoveAntiCheat_EasyVer(Rosemary &r) {
 	// HS
 	ULONG_PTR Call = r.Scan(L"E8 ?? ?? ?? ?? 85 C0 74 0A E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 83 ?? ?? 00 0F");
@@ -42,27 +38,28 @@ bool RemoveAntiCheat_EasyVer(Rosemary &r) {
 	}
 
 /*	ULONG_PTR uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveAntiCheat[0]);
->>>>>>> Stashed changes
 
 	if (!uCSecurityClient__IsInstantiated) {
 		uCSecurityClient__IsInstantiated = r.Scan(AOB_EasyRemoveAntiCheat[1]);
 
 		if (!uCSecurityClient__IsInstantiated) return false;
-	}
+	}*/
 
 	SCANRES(uCSecurityClient__IsInstantiated);
-
-<<<<<<< Updated upstream
 	r.Patch(uCSecurityClient__IsInstantiated, L"31 C0 C3");
-	//AOBPatch(EasyRemoveHS, L"31 C0 C3");
-=======
+
 	//AOBPatch(EasyRemoveAntiCheat, L"31 C0 C3");
->>>>>>> Stashed changes
 
-	AOBPatch(StartKeyCrypt, L"31 C0 C3");
-	AOBPatch(StopKeyCrypt, L"31 C0 C3");
+	ULONG_PTR uKeyCryptCall = r.Scan(L"E8 ?? ?? ?? ?? EB 05 E8 ?? ?? ?? ?? 66");
+	ULONG_PTR uStartKeyCrypt = uKeyCryptCall + 0x05 + *(signed long int*)(uKeyCryptCall + 0x01);
+	ULONG_PTR uStopKeyCrypt = uKeyCryptCall + 0x0C + *(signed long int*)(uKeyCryptCall + 0x08);
+	r.Patch(uStartKeyCrypt, L"31 C0 C3");
+	r.Patch(uStopKeyCrypt, L"31 C0 C3");
 
-	//TMS157.2 HS things check
+	//AOBPatch(StartKeyCrypt, L"31 C0 C3");
+	//AOBPatch(StopKeyCrypt, L"31 C0 C3");
+
+	//TMS157.2 HS things (when enter character select page)
 	ULONG_PTR uHS_things = r.Scan(L"83 ?? ?? ?? ?? ?? 00 74 45 83 ?? ?? 00 A1 ?? ?? ?? ?? FF ?? ?? ?? ?? ?? 8D ?? EC 68 ?? ?? ?? ?? 50 C6 ?? ?? 02 E8");
 	r.JMP(uHS_things, uHS_things + 0x4E); //r.JMP(0x60ED4F, 0x60ED9D);
 
@@ -74,16 +71,10 @@ bool RemoveAntiCheat_EasyVer(Rosemary &r) {
 void FixClient(Rosemary &r) {
 	// JMS v186 or before
 	AOBPatch_ADD(WindowMode_PreBB, 0x03, L"00 00 00 00");
-	// JMS v187 only, later version of bigbang client has window mode option (it will cause TMS crash)
-	//AOBPatch(WindowMode_PostBB, L"31 C0 C3");
-
 	AOBPatch(Launcher, L"B8 01 00 00 00 C3");
 	AOBPatch(Ad, L"B8 01 00 00 00 C3");
 	// v194.0 has System Settings causes crash without using this code
 	AOBPatch(MapleNetwork, L"31 C0 C2 08 00");
-
-	// TMS old default DNS (not available cause crash)
-	r.StringPatch("tw.login.maplestory.gamania.com", "127.0.0.1");
 }
 
 // Hardware BreakPoint Detection
@@ -96,23 +87,40 @@ void EmuMain() {
 	Rosemary r;
 
 	if (!RemoveCRC(r)) {
-		CRCBypass(r);
+		// if flag is true, Memory Dump Method is ignored
+		if (!GetMSDisableMemoryDump()) {
+			CRCBypass(r);
+		}
 	}
 
-	//r.Patch(0x00454AEA, L"31 C0 C3"); // hide DLL MSEA v97
-	//r.Patch(0x004C1930, L"31 C0 C3"); // hide DLL MSEA v102
-	//r.Patch(0x00AB83A0, L"83 C4 14"); // MSEA v97 MSCRC function
-	//r.JMP(0x00AB83A0 + 3, 0x00AB9C8F); // MSEA v97 MSCRC function
+	switch (GetMSRegion()) {
+	case MS_JMS: {
+		RemoveHackShield(r);
+		Disable_AntiDebug(r);
+		FixClient(r);
 
-	r.JMP(0xAC0A82, r.Scan(L"68 FF 00 00 00 6A 00 6A 00 8B ?? ?? ?? ?? ?? 83 ?? ?? ?? 6A 03 FF 15"));//TMS157.2 MSCRC ManipulatePacket
+		switch (GetMSVersion()) {
+		case 187:
+		{
+			// JMS v187 only, later version of bigbang client has window mode option (it will cause TMS crash)
+			AOBPatch(WindowMode_PostBB, L"31 C0 C3");
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
 
-	RemoveHS_EasyVer(r);
-	//RemoveHackShield(r);
+		break;
+	}
+	case MS_TWMS: {
+		RemoveAntiCheat_EasyVer(r);
+		Disable_AntiDebug(r);
+		FixClient(r);
+		// TMS old default DNS (not available cause crash)
+		ULONG_PTR uGamania = r.StringPatch("tw.login.maplestory.gamania.com", "127.0.0.1");
 
-<<<<<<< Updated upstream
-	Disable_AntiDebug(r);
-	FixClient(r);
-=======
 		SCANRES(uGamania);
 
 		switch (GetMSVersion()) {
@@ -163,5 +171,4 @@ void EmuMain() {
 		break;
 	}
 	}
->>>>>>> Stashed changes
 }

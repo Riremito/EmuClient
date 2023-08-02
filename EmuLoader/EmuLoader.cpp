@@ -1,5 +1,7 @@
 #include"../Share/Simple/Simple.h"
 #include"../Share/Hook/SimpleHook.h"
+#include<intrin.h>
+#pragma intrinsic(_ReturnAddress)
 
 
 #ifndef _WIN64
@@ -92,11 +94,24 @@ LSTATUS APIENTRY RegCreateKeyExA_Hook(HKEY hKey, LPCSTR lpSubKey, DWORD Reserved
 	return _RegCreateKeyExA(hKey, lpSubKey, Reserved, lpClass, dwOptions, samDesired, lpSecurityAttributes, phkResult, lpdwDisposition);
 }
 
+decltype(GetStartupInfoA) *_GetStartupInfoA = NULL;
+auto WINAPI GetStartupInfoA_Hook(LPSTARTUPINFOA lpStartupInfo) {
+	if (!bAlreadyLoaded) {
+		if (lpStartupInfo && SimpleHook::IsCallerEXE(_ReturnAddress())) {
+			DEBUG(L"DelayLoad GetStartupInfoA");
+			DelayLoad();
+		}
+	}
+	return _GetStartupInfoA(lpStartupInfo);
+}
+
 
 bool EnableHook() {
 	SHook(CreateMutexExW);
 	// v334.2
 	SHook(RegCreateKeyExA);
+	// TMS (cause DNS Resolution on CreateMutexExW before)
+	SHook(GetStartupInfoA);
 	return true;
 }
 
