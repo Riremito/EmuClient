@@ -17,7 +17,7 @@
 std::vector<std::wstring> vFastLoadDlls;
 std::vector<std::wstring> vDelayLoadDlls;
 
-// ƒƒ‚ƒŠ“WŠJ‘O‚É“Ç‚İ‚Ş
+// ãƒ¡ãƒ¢ãƒªå±•é–‹å‰ã«èª­ã¿è¾¼ã‚€
 bool FastLoad() {
 	for (size_t i = 0; i < vFastLoadDlls.size(); i++) {
 		if (LoadLibraryW(vFastLoadDlls[i].c_str())) {
@@ -27,7 +27,7 @@ bool FastLoad() {
 	return true;
 }
 
-// ƒƒ‚ƒŠ“WŠJŒã‚É“Ç‚İ‚Ş
+// ãƒ¡ãƒ¢ãƒªå±•é–‹å¾Œã«èª­ã¿è¾¼ã‚€
 bool bAlreadyLoaded = false;
 bool DelayLoad() {
 	if (bAlreadyLoaded) {
@@ -108,8 +108,8 @@ bool EmuLoader(HMODULE hDll) {
 		return false;
 	}
 
-	// FixThemida.dll, ‹N“®‚Å‚«‚È‚¢–â‘è‚ÌC³
-	// LocalHost.dll, Ú‘±æ‚Ì•ÏX
+	// FixThemida.dll, èµ·å‹•ã§ããªã„å•é¡Œã®ä¿®æ­£
+	// LocalHost.dll, æ¥ç¶šå…ˆã®å¤‰æ›´
 	for (size_t i = 1; i <= 10; i++) {
 		std::wstring wDllName;
 		conf.Read(FAST_LOAD, L"DLL_" + std::to_wstring(i), wDllName);
@@ -124,8 +124,8 @@ bool EmuLoader(HMODULE hDll) {
 		}
 	}
 
-	// EmuMain.dll, GameGuard, HackShield, XignCode‚Ìíœ‚ÆMSCRC‚Ìíœ‚Ü‚½‚ÍBypass, ƒEƒBƒ“ƒhƒE‰»‚È‚ÇƒQ[ƒ€‹N“®‚ÉŠÖ‚·‚éC³
-	// EmuExtra.dll, ƒQ[ƒ€“à‚Ìˆ—‚Ì•ÏX
+	// EmuMain.dll, GameGuard, HackShield, XignCodeã®å‰Šé™¤ã¨MSCRCã®å‰Šé™¤ã¾ãŸã¯Bypass, ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦åŒ–ãªã©ã‚²ãƒ¼ãƒ èµ·å‹•ã«é–¢ã™ã‚‹ä¿®æ­£
+	// EmuExtra.dll, ã‚²ãƒ¼ãƒ å†…ã®å‡¦ç†ã®å¤‰æ›´
 	for (size_t i = 1; i <= 10; i++) {
 		std::wstring wDllName;
 		conf.Read(DELAY_LOAD, L"DLL_" + std::to_wstring(i), wDllName);
