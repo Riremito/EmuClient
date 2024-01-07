@@ -119,10 +119,28 @@ bool RemoveCRC_v334(Rosemary &r) {
 	return true;
 }
 
+bool RemoveCRC_OnEnterField_TMS192_2(Rosemary& r) {
+	ULONG_PTR uOnEnterField_Enter_VM = r.Scan(L"E9 ?? ?? ?? ?? 50 EB 55 2C 8A 4A 9C AF 79 54 A0");
+	//+0x91
+	ULONG_PTR uOnEnterField_Leave_VM = r.Scan(L"8B ?? ?? ?? ?? ?? 81 ?? EC 68 00 00 E8 ?? ?? ?? ?? 8B C8 E8 ?? ?? ?? ?? 8B");
+
+	if (!uOnEnterField_Enter_VM || !uOnEnterField_Leave_VM) {
+		return false;
+	}
+
+	r.JMP(uOnEnterField_Enter_VM, uOnEnterField_Leave_VM);
+	DEBUG(L"RemoveCRC_OnEnterField (TMSv192.2): " + DWORDtoString(uOnEnterField_Enter_VM) + L" -> " + DWORDtoString(uOnEnterField_Leave_VM));
+	return true;
+}
+
 bool RemoveCRC(Rosemary &r) {
 	int check = 0;
 
 	if (RemoveCRC_Run(r)) {
+		check++;
+	}
+
+	if (RemoveCRC_OnEnterField_TMS192_2(r)) {
 		check++;
 	}
 

@@ -94,6 +94,10 @@ void EmuMain() {
 		FixClient(r);
 
 		switch (GetMSVersion()) {
+		case 186: {
+			//r.JMP(0x0086826A, 0x0086874D);
+			break;
+		}
 		case 187:
 		{
 			// JMS v187 only, later version of bigbang client has window mode option (it will cause TMS crash)
