@@ -15,5 +15,6 @@ void EmuMain();
 MSRegion GetMSRegion();
 int GetMSVersion();
 bool GetMSDisableMemoryDump();
+bool GetDEVM();
 
 #endif

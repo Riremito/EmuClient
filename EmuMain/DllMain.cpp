@@ -3,6 +3,7 @@
 MSRegion gConfig_Region = MS_JMS;
 int gConfig_Version = 0;
 bool gDisable_MemoryDump = false;
+bool gDEVM = false;
 
 MSRegion GetMSRegion() {
 	return gConfig_Region;
@@ -63,6 +64,14 @@ void SetMSDisableMemoryDump(bool flag) {
 	gDisable_MemoryDump = flag;
 }
 
+bool GetDEVM() {
+	return gDEVM;
+}
+
+void SetDEVM(bool flag) {
+	gDEVM = flag;
+}
+
 
 #ifndef _WIN64
 #define DLL_NAME L"EmuMain"
@@ -74,7 +83,7 @@ void SetMSDisableMemoryDump(bool flag) {
 
 bool LoadConfig(HMODULE hDll) {
 	Config conf(INI_FILE_NAME, hDll);
-	std::wstring wRegion, wVersion, wMemoryDump;
+	std::wstring wRegion, wVersion, wDEVM,wMemoryDump;
 
 	// Region
 	if (conf.Read(DLL_NAME, L"Region", wRegion)) {
@@ -86,6 +95,12 @@ bool LoadConfig(HMODULE hDll) {
 		int ver = _wtoi(wVersion.c_str());
 		SetMSVersion(ver);
 		DEBUG(L"Version=" + std::to_wstring(GetMSVersion()));
+	}
+	// Unvirtualized and already MSCRC is removed
+	if (conf.Read(DLL_NAME, L"DEVM", wDEVM)) {
+		int val = _wtoi(wDEVM.c_str());
+		SetDEVM(val);
+		DEBUG(L"DEVM=" + std::to_wstring(GetDEVM()));
 	}
 	// MSCRC Option
 	if (conf.Read(DLL_NAME, L"DisableMemoryDump", wMemoryDump)) {

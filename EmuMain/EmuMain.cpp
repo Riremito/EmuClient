@@ -80,10 +80,15 @@ void Disable_AntiDebug(Rosemary &r) {
 void EmuMain() {
 	Rosemary r;
 
-	if (!RemoveCRC(r)) {
-		// if flag is true, Memory Dump Method is ignored
-		if (!GetMSDisableMemoryDump()) {
-			CRCBypass(r);
+	// unpack and unvirtualized checks, if your client is unvirtualized, you should remove mscrc yourself
+	if (!GetDEVM()) {
+		// mscrc remove for packed client, it does not work if client is already unvirtualized
+		if (!RemoveCRC(r)) {
+			// you can disable memory dump method by ini
+			if (!GetMSDisableMemoryDump()) {
+				// regular mscrc bypass method
+				CRCBypass(r);
+			}
 		}
 	}
 
