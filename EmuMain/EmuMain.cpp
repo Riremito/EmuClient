@@ -137,7 +137,32 @@ void EmuMain() {
 			break;
 		}
 		}
-
+		break;
+	}
+	case MS_CMS: {
+		RemoveHackShield(r);
+		Disable_AntiDebug(r);
+		FixClient(r);
+		switch (GetMSVersion()) {
+		case 86:
+		{
+			r.Patch(0x00A1E6F0, L"31 C0 C2 04 00"); // hs init
+			//AOBPatch(EHSvc_Loader_1, L"31 C0 C2 10 03");
+			//AOBPatch(EHSvc_Loader_2, L"31 C0 C2 18 00");
+			// heatbeat is not needed to run client for private server, but if you send heartbeaat packet to client, client will get crash
+			//AOBPatch(HeartBeat, L"31 C0 C2 04 00");
+			//AOBPatch(MKD25tray, L"31 C0 C3");
+			//AOBPatch(Autoup, L"31 C0 C3");
+			//AOBPatch(ASPLunchr, L"31 C0 C3");
+			r.Patch(0x00A1F100, L"31 C0 C3"); // hs update
+			r.Patch(0x009CD000, L"31 C9 90 90 90 90"); // Window Mode
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
 		break;
 	}
 	case MS_MSEA: {
@@ -162,6 +187,26 @@ void EmuMain() {
 		}
 		}
 
+		break;
+	}
+	case MS_KMS: {
+		switch (GetMSVersion()) {
+		case 100:
+		{
+			// Artale Client v1.03 (KMS v1.2.100)
+			// CWvsApp::ConnectLogin
+			r.Patch(0x009D0483, L"31 C0 C3"); // this function is edited and it includes anti debugging or something
+			// Window Mode
+			r.Patch(0x009D1067 + 3, L"00 00 00 00");
+		}
+		default:
+		{
+			break;
+		}
+		}
+		break;
+	}
+	case MS_GMS: {
 		break;
 	}
 	default:

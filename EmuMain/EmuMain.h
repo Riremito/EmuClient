@@ -7,7 +7,10 @@
 enum MSRegion {
 	MS_JMS, // default
 	MS_TWMS,
-	MS_MSEA
+	MS_CMS,
+	MS_MSEA,
+	MS_KMS,
+	MS_GMS,
 };
 
 void EmuMain();

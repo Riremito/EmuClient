@@ -16,8 +16,23 @@ bool SetMSRegion(std::wstring wRegion) {
 		return true;
 	}
 
+	if (wRegion.compare(L"CMS") == 0) {
+		gConfig_Region = MS_CMS;
+		return true;
+	}
+
 	if (wRegion.compare(L"MSEA") == 0) {
 		gConfig_Region = MS_MSEA;
+		return true;
+	}
+
+	if (wRegion.compare(L"KMS") == 0) {
+		gConfig_Region = MS_KMS;
+		return true;
+	}
+
+	if (wRegion.compare(L"GMS") == 0) {
+		gConfig_Region = MS_GMS;
 		return true;
 	}
 
@@ -35,9 +50,21 @@ std::wstring GetMSRegionString() {
 	{
 		return L"TWMS";
 	}
+	case MS_CMS:
+	{
+		return L"CMS";
+	}
 	case MS_MSEA:
 	{
 		return L"MSEA";
+	}
+	case MS_KMS:
+	{
+		return L"KMS";
+	}
+	case MS_GMS:
+	{
+		return L"GMS";
 	}
 	default:
 	{
