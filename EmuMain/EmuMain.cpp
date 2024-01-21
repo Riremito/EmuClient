@@ -1,3 +1,6 @@
+//#define _WINSOCK_DEPRECATED_NO_WARNINGS
+//#include<winsock2.h>
+//#pragma comment(lib, "ws2_32.lib")
 #include"EmuMain.h"
 #include"AobList.h"
 #include"RemoveCRC.h"
@@ -77,6 +80,18 @@ void Disable_AntiDebug(Rosemary &r) {
 	AOBPatch(DR_Check, L"31 C0 C3");
 }
 
+/*
+decltype(gethostbyname) *_gethostbyname = NULL;
+struct hostent* PASCAL gethostbyname_Hook(const char * name) {
+	// TWMS fix
+	if (name && strcmp(name, "tw.login.maplestory.gamania.com")) {
+		return _gethostbyname("127.0.0.1");
+	}
+
+	return _gethostbyname(name);
+}
+*/
+
 void EmuMain() {
 	Rosemary r;
 
@@ -118,17 +133,48 @@ void EmuMain() {
 		break;
 	}
 	case MS_TWMS: {
-		RemoveAntiCheat_EasyVer(r);
-		Disable_AntiDebug(r);
-		FixClient(r);
-		// TMS old default DNS (not available cause crash)
-		ULONG_PTR uGamania = r.StringPatch("tw.login.maplestory.gamania.com", "127.0.0.1");
-
-		SCANRES(uGamania);
-
 		switch (GetMSVersion()) {
+		case 122:
+		{
+			RemoveCRC(r);
+			ULONG_PTR uGamania = r.StringPatch("tw.login.maplestory.gamania.com", "127.0.0.1");
+			SCANRES(uGamania);
+			// Remove HackShield Easy Ver
+			r.Patch(0x00564878, L"31 C0 C3");
+			r.Patch(0x0081FB58, L"31 C0 C3"); // 007E67D4
+			r.Patch(0x0081FE3D, L"31 C0 C3"); // 007E67D4
+			// Window Mode
+			r.Patch(0x007E395D + 3, L"00 00 00 00");
+
+			// modify tw.login.maplestory.gamania.com, or hook inet_addr
+			//r.Patch(0x004771D4, L"31 C0 C2 08 00"); // not work...
+			//SHook(gethostbyname);
+
+			// HackShield_Init is vmed? not found
+			// MSCRC 007DE758
+
+			/*
+			// EHSvc_Loader_1 -> ret 0310 C2 10 03 55 8B EC
+			r.Patch(0x00826E16, L"31 C0 C2 10 03");
+			// EHSvc_Loader_2 -> EB 08 EB AB EB A9 EB A7 EB A5 5F 8B E5 5D C2 18 00
+			r.Patch(0x00825F42, L"31 C0 C2 18 00");
+			// MKD25tray + ASPLunchr
+			r.Patch(0x0081FDD6, L"31 C0 C3");
+			// Autoup
+			r.Patch(0x0081FF00, L"31 C0 C3");
+			// HSUpdate
+			r.Patch(0x0081FBD9, L"31 C0 C3");
+			*/
+			break;
+		}
 		case 157:
 		{
+			RemoveAntiCheat_EasyVer(r);
+			Disable_AntiDebug(r);
+			FixClient(r);
+			// TMS old default DNS (not available cause crash)
+			ULONG_PTR uGamania = r.StringPatch("tw.login.maplestory.gamania.com", "127.0.0.1");
+			SCANRES(uGamania);
 			r.JMP(0xAC0A82, r.Scan(L"68 FF 00 00 00 6A 00 6A 00 8B ?? ?? ?? ?? ?? 83 ?? ?? ?? 6A 03 FF 15"));//TMS157.2 MSCRC ManipulatePacket
 			break;
 		}
