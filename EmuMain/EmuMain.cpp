@@ -186,22 +186,41 @@ void EmuMain() {
 		break;
 	}
 	case MS_CMS: {
-		RemoveHackShield(r);
-		Disable_AntiDebug(r);
-		FixClient(r);
 		switch (GetMSVersion()) {
 		case 86:
 		{
-			r.Patch(0x00A1E6F0, L"31 C0 C2 04 00"); // hs init
-			//AOBPatch(EHSvc_Loader_1, L"31 C0 C2 10 03");
-			//AOBPatch(EHSvc_Loader_2, L"31 C0 C2 18 00");
-			// heatbeat is not needed to run client for private server, but if you send heartbeaat packet to client, client will get crash
-			//AOBPatch(HeartBeat, L"31 C0 C2 04 00");
+			// RemoveCRC_Run: 00733A20 -> 009CCAD9 (00DA7104)
+			RemoveCRC(r);
+			// 00B69428, 00B69410, 00B693F8, 00B693E0, 00B693C8
+			ULONG_PTR uGamania = r.StringPatch("mxdlogin.poptang.com", "221.231.130.70");
+			SCANRES(uGamania);
+			uGamania = r.StringPatch("mxdlogin2.poptang.com", "221.231.130.70");
+			SCANRES(uGamania);
+			uGamania = r.StringPatch("mxdlogin3.poptang.com", "221.231.130.70");
+			SCANRES(uGamania);
+			uGamania = r.StringPatch("mxdlogin5.poptang.com", "221.231.130.70");
+			SCANRES(uGamania);
+			uGamania = r.StringPatch("mxdlogin6.poptang.com", "221.231.130.70");
+			SCANRES(uGamania);
+			// Remove HackShield Easy Ver
+			r.Patch(0x004A5090, L"31 C0 C3");
+			// HideDLL
+			r.Patch(0x0045F830, L"31 C0 C3");
+
+			// HackShield_Init
+			//r.Patch(0x00A1E6F0, L"31 C0 C2 04 00");
+			// EHSvc_Loader_1
+			//r.Patch(0x00A25CA6, L"31 C0 C2 10 03");
+			// EHSvc_Loader_2
+			//r.Patch(0x00A24DD2, L"31 C0 C2 18 00");
 			//AOBPatch(MKD25tray, L"31 C0 C3");
 			//AOBPatch(Autoup, L"31 C0 C3");
 			//AOBPatch(ASPLunchr, L"31 C0 C3");
-			r.Patch(0x00A1F100, L"31 C0 C3"); // hs update
-			r.Patch(0x009CD000, L"31 C9 90 90 90 90"); // Window Mode
+
+			// HSUpdate vmed
+			//r.Patch(0x00A1F100, L"31 C0 C3");
+			// Window Mode
+			//r.Patch(0x009CD000, L"31 C9 90 90 90 90");
 			break;
 		}
 		default:
