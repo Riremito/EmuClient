@@ -15,12 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EmuLoader.cpp">
+    <ClCompile Include="BandAid.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="EmuLoader.def">
+    <None Include="BandAid.def">
       <Filter>ソース ファイル</Filter>
     </None>
   </ItemGroup>

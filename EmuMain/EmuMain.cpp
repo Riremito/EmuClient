@@ -121,7 +121,7 @@ void EmuMain() {
 		case 187:
 		{
 			// JMS v187 only, later version of bigbang client has window mode option (it will cause TMS crash)
-			AOBPatch(WindowMode_PostBB, L"31 C0 C3");
+			AOBPatch(WindowMode_PostBB, L"31 C0 90");
 			break;
 		}
 		default:
@@ -206,6 +206,10 @@ void EmuMain() {
 			r.Patch(0x004A5090, L"31 C0 C3");
 			// HideDLL
 			r.Patch(0x0045F830, L"31 C0 C3");
+			// GetACP Bypass
+			r.Patch(0x009C53A0, L"EB");
+			// Skip Launcher
+			r.Patch(0x007361D0, L"B8 01 00 00 00 C3");
 
 			// HackShield_Init
 			//r.Patch(0x00A1E6F0, L"31 C0 C2 04 00");

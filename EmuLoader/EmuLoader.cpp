@@ -179,3 +179,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 	}
 	return TRUE;
 }
+
+DWORD __stdcall TestFunction() {
+	return 0x1337;
+}
