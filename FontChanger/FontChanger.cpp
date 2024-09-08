@@ -107,21 +107,6 @@ UINT WINAPI GetACP_Hook() {
 	return settings.CodePage;
 }
 
-decltype(GetOEMCP) *_GetOEMCP = NULL;
-UINT WINAPI GetOEMCP_Hook() {
-	return settings.CodePage;
-}
-
-decltype(GetCPInfo) *_GetCPInfo = NULL;
-BOOL WINAPI GetCPInfo_Hook(
-	UINT       CodePage,
-	LPCPINFO  lpCPInfo
-)
-{
-	CodePage = settings.CodePage;
-	return _GetCPInfo(CodePage, lpCPInfo);
-}
-
 static int CheckWindowStyle(HWND hWnd, DWORD type/*ebx*/) {
 
 	LONG_PTR n = GetWindowLongPtrW(hWnd, GWL_STYLE);
@@ -337,27 +322,6 @@ LONG WINAPI ImmGetCompositionStringA_Hook(
 	return ret;
 }
 
-// for English players?
-LONG WINAPI HookImmGetCompositionStringA_WM(
-	HIMC hIMC,
-	DWORD dwIndex,
-	LPSTR lpBuf,
-	DWORD  dwBufLen
-)
-{
-	LONG wsize = ImmGetCompositionStringW(hIMC, dwIndex, NULL, 0);
-	LPWSTR wstr = (LPWSTR)AllocateZeroedMemory(wsize);
-	ImmGetCompositionStringW(hIMC, dwIndex, wstr, wsize);
-	LONG lsize = (wsize + 1) << 1;
-	if (lpBuf)
-	{
-		lsize = _WideCharToMultiByte(settings.CodePage, 0, wstr, wsize, lpBuf, lsize, Original.lpDefaultChar, &Original.lpUsedDefaultChar);
-		lpBuf[lsize] = '\0'; // make tail ! 
-	}
-	FreeStringInternal(wstr);
-	return lsize;
-}
-
 decltype(ImmGetCandidateListA) *_ImmGetCandidateListA = NULL;
 DWORD WINAPI ImmGetCandidateListA_Hook(
 	HIMC            hIMC,
@@ -369,7 +333,7 @@ DWORD WINAPI ImmGetCandidateListA_Hook(
 	DWORD ret = _ImmGetCandidateListA(hIMC, deIndex, lpCandList, dwBufLen);
 	if (lpCandList)
 	{
-		for (int i = 0; i < lpCandList->dwCount; i++)
+		for (DWORD i = 0; i < lpCandList->dwCount; i++)
 		{
 			LPSTR lstr = (LPSTR)lpCandList + lpCandList->dwOffset[i];
 			LPWSTR wstr = MultiByteToWideCharInternal(lstr, Original.CodePage);
@@ -383,37 +347,6 @@ DWORD WINAPI ImmGetCandidateListA_Hook(
 				FreeStringInternal(wstr);
 			}
 		}
-	}
-	return ret;
-}
-
-// ?
-DWORD WINAPI HookImmGetCandidateListA_WM(
-	HIMC            hIMC,
-	DWORD           deIndex,
-	LPCANDIDATELIST lpCandList,
-	DWORD           dwBufLen
-)
-{
-	DWORD ret = _ImmGetCandidateListA(hIMC, deIndex, lpCandList, dwBufLen);
-	if (lpCandList)
-	{
-		DWORD dwBufLenW = ImmGetCandidateListW(hIMC, deIndex, NULL, NULL);
-		LPCANDIDATELIST lpCandListW = (LPCANDIDATELIST)AllocateZeroedMemory(dwBufLenW);
-		ImmGetCandidateListW(hIMC, deIndex, lpCandListW, dwBufLenW);
-		for (int i = 0; i < lpCandList->dwCount; i++)
-		{
-			LPSTR lstr = (LPSTR)lpCandList + lpCandList->dwOffset[i];
-			LPWSTR wstr = (LPWSTR)lpCandListW + lpCandListW->dwOffset[i];
-			if (lstr)
-			{
-				int lsize = lstrlenA(lstr);
-				int wsize = wcslen(wstr);
-				_WideCharToMultiByte(settings.CodePage, 0, wstr, wsize, lstr, lsize, NULL, NULL);
-				//filelog << lstr << "###" << lsize << "###" << wstr << "###" <<wsize << std::endl;
-			}
-		}
-		FreeStringInternal(lpCandListW);
 	}
 	return ret;
 }
@@ -656,57 +589,6 @@ HWND WINAPI CreateDialogIndirectParamA_Hook(
 	return CreateDialogIndirectParamW(hInstance, lpTemplate, hWndParent, lpDialogFunc, dwInitParam);
 }
 
-/*
-decltype(VerQueryValueA) *_VerQueryValueA = NULL;
-BOOL WINAPI VerQueryValueA_Hook(
-	LPCVOID pBlock,
-	LPCSTR lpSubBlock,
-	LPVOID* lplpBuffer,
-	PUINT puLen
-)
-{
-	if (lstrlenA(lpSubBlock) > 2 && lpSubBlock[0] == '\\' && lpSubBlock[1] == 'S')
-	{
-		LPWSTR lpSubBlockW = MultiByteToWideCharInternal(lpSubBlock);
-		LPWSTR lpBufferW;
-		BOOL ret = VerQueryValueW(pBlock, lpSubBlockW, (LPVOID*)&lpBufferW, puLen);
-		LPSTR lpBufferA = WideCharToMultiByteInternal(lpBufferW);
-		*lplpBuffer = lpBufferA;
-		*puLen = lstrlenA(lpBufferA);
-		FreeStringInternal(lpSubBlockW);
-		return ret;
-	}
-	return _VerQueryValueA(pBlock, lpSubBlock, lplpBuffer, puLen);
-}
-*/
-
-decltype(GetModuleFileNameA) *_GetModuleFileNameA = NULL;
-DWORD WINAPI GetModuleFileNameA_Hook(
-	HMODULE hModule,
-	LPSTR lpFilename,
-	DWORD nSize
-)
-{
-	LPWSTR lpFilenameW = (LPWSTR)AllocateZeroedMemory(MAX_PATH);
-	DWORD ret = GetModuleFileNameW(hModule, lpFilenameW, nSize);
-	_WideCharToMultiByte(settings.CodePage, 0, lpFilenameW, MAX_PATH, lpFilename, MAX_PATH, NULL, NULL);
-	FreeStringInternal(lpFilenameW);
-	return ret;
-}
-
-decltype(LoadLibraryExA) *_LoadLibraryExA = NULL;
-HMODULE WINAPI LoadLibraryExA_Hook(
-	_In_ LPCSTR lpLibFileName,
-	_Reserved_ HANDLE hFile,
-	_In_ DWORD dwFlags
-)
-{
-	LPWSTR lpLibFileNameW = MultiByteToWideCharInternal(lpLibFileName);
-	HMODULE ret = LoadLibraryExW(lpLibFileNameW, hFile, dwFlags);
-	FreeStringInternal(lpLibFileNameW);
-	return ret;
-}
-
 decltype(RegisterClassA) *_RegisterClassA = NULL;
 ATOM WINAPI RegisterClassA_Hook(
 	_In_ CONST WNDCLASSA* lpWndClass
@@ -747,16 +629,6 @@ ATOM WINAPI RegisterClassExA_Hook(
 	return RegisterClassExW(lpWndClassW);
 }
 
-inline LRESULT CallProcAddress(LPVOID lpProcAddress, HWND hWnd, HWND hMDIClient,
-	BOOL bMDIClientEnabled, INT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	typedef LRESULT(WINAPI* fnWNDProcAddress)(HWND, int, WPARAM, LPARAM);
-	typedef LRESULT(WINAPI* fnMDIProcAddress)(HWND, HWND, int, WPARAM, LPARAM);
-	// MDI or not ??? 
-	return (bMDIClientEnabled) ? ((fnMDIProcAddress)(DWORD_PTR)lpProcAddress)(hWnd, hMDIClient, uMsg, wParam, lParam)
-		: ((fnWNDProcAddress)(DWORD_PTR)lpProcAddress)(hWnd, uMsg, wParam, lParam);
-}
-
 decltype(DefWindowProcA) *_DefWindowProcA = NULL;
 LRESULT CALLBACK DefWindowProcA_Hook(
 	_In_ HWND hWnd,
@@ -771,83 +643,6 @@ LRESULT CALLBACK DefWindowProcA_Hook(
 		return _DefWindowProcA(hWnd, Msg, wParam, lParam);
 }
 
-decltype(GetTimeZoneInformation) *_GetTimeZoneInformation = NULL;
-DWORD WINAPI GetTimeZoneInformation_Hook(
-	_Out_ LPTIME_ZONE_INFORMATION lpTimeZoneInformation
-)
-{
-	DWORD ret = _GetTimeZoneInformation(lpTimeZoneInformation);
-	if (ret != TIME_ZONE_ID_INVALID) {
-		// Warning Bias becomes negative!!!
-		lpTimeZoneInformation->Bias = -settings.Bias;
-	}
-	return ret;
-}
-
-decltype(CreateDirectoryA) *_CreateDirectoryA = NULL;
-BOOL WINAPI CreateDirectoryA_Hook(
-	_In_ LPCSTR lpPathName,
-	_In_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes
-)
-{
-	LPWSTR lpPathNameW = MultiByteToWideCharInternal(lpPathName, Original.CodePage);
-	BOOL ret = CreateDirectoryW(lpPathNameW, lpSecurityAttributes);
-	if (lpPathNameW)
-	{
-		FreeStringInternal(lpPathNameW);
-	}
-	return ret;
-}
-
-decltype(CreateFileA) *_CreateFileA = NULL;
-HANDLE WINAPI CreateFileA_Hook(
-	_In_ LPCSTR lpFileName,
-	_In_ DWORD dwDesiredAccess,
-	_In_ DWORD dwShareMode,
-	_In_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes,
-	_In_ DWORD dwCreationDisposition,
-	_In_ DWORD dwFlagsAndAttributes,
-	_In_opt_ HANDLE hTemplateFile
-)
-{
-	LPWSTR lpFileNameW = MultiByteToWideCharInternal(lpFileName, Original.CodePage);
-	HANDLE ret = CreateFileW(
-		lpFileNameW,
-		dwDesiredAccess,
-		dwShareMode,
-		lpSecurityAttributes,
-		dwCreationDisposition,
-		dwFlagsAndAttributes,
-		hTemplateFile
-	);
-	if (lpFileNameW)
-	{
-		FreeStringInternal(lpFileNameW);
-	}
-	return ret;
-}
-
-decltype(GetLocaleInfoA) *_GetLocaleInfoA = NULL;
-int WINAPI GetLocaleInfoA_Hook(
-	_In_ LCID Locale,
-	_In_ LCTYPE LCType,
-	_Out_writes_opt_(cchData) LPSTR lpLCData,
-	_In_ int cchData
-)
-{
-	return _GetLocaleInfoA(settings.LCID, LCType, lpLCData, cchData);
-}
-
-decltype(GetLocaleInfoW) *_GetLocaleInfoW = NULL;
-int WINAPI GetLocaleInfoW_Hook(
-	_In_ LCID Locale,
-	_In_ LCTYPE LCType,
-	_Out_writes_opt_(cchData) LPWSTR lpLCData,
-	_In_ int cchData
-)
-{
-	return _GetLocaleInfoW(settings.LCID, LCType, lpLCData, cchData);
-}
 // LR
 /*
 decltype(CreateFontIndirectA) *_CreateFontIndirectA = NULL;
@@ -873,8 +668,6 @@ bool FontHook() {
 	SHook(CreateWindowExA);
 	SHook(MessageBoxA);
 	SHook(GetACP);
-	SHook(GetOEMCP);
-	SHook(GetCPInfo);
 	SHook(SendMessageA);
 	SHook(SetWindowTextA);
 	SHook(GetWindowTextA);
@@ -890,12 +683,9 @@ bool FontHook() {
 	SHook(IsDBCSLeadByteEx);
 	SHook(DialogBoxParamA);
 	SHook(CreateDialogIndirectParamA);
-	//SHook(VerQueryValueA);
 	SHook(RegisterClassA);
 	SHook(RegisterClassExA);
 	SHook(DefWindowProcA);
-	SHook(GetLocaleInfoA);
-	SHook(GetLocaleInfoW);
 	SHook(ImmGetCompositionStringA);
 	SHook(ImmGetCandidateListA);
 	return true;
