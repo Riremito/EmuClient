@@ -11,6 +11,7 @@ enum MSRegion {
 	MS_MSEA,
 	MS_KMS,
 	MS_GMS,
+	MS_KMST,
 };
 
 void EmuMain();

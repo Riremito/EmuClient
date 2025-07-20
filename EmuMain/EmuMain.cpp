@@ -278,6 +278,24 @@ void EmuMain() {
 	case MS_GMS: {
 		break;
 	}
+	case MS_KMST: {
+		switch (GetMSVersion()) {
+		case 1029:
+		{
+			// TSingleton<CSecurityClient>::IsInstantiated
+			r.Patch(0x006E7660, L"31 C0 C3");
+			// Check_Language
+			r.Patch(0x01A89514, L"EB");
+			// ?
+			r.JMP(0x00BC7145, 0x00BC7159);
+		}
+		default:
+		{
+			break;
+		}
+		}
+		break;
+	}
 	default:
 	{
 		RemoveHackShield(r);

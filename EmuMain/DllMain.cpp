@@ -36,6 +36,11 @@ bool SetMSRegion(std::wstring wRegion) {
 		return true;
 	}
 
+	if (wRegion.compare(L"KMST") == 0) {
+		gConfig_Region = MS_KMST;
+		return true;
+	}
+
 	return false;
 }
 
@@ -65,6 +70,10 @@ std::wstring GetMSRegionString() {
 	case MS_GMS:
 	{
 		return L"GMS";
+	}
+	case MS_KMST:
+	{
+		return L"KMST";
 	}
 	default:
 	{
