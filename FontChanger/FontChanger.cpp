@@ -1,5 +1,8 @@
 #include"../Share/Simple/Simple.h"
 #include"../Share/Hook/SimpleHook.h"
+#pragma comment(lib, "Imm32.lib")
+#include <intrin.h>
+#pragma intrinsic(_ReturnAddress)
 
 UINT gCodePage = 949;
 UINT getCodePage() {
@@ -35,6 +38,11 @@ HFONT WINAPI CreateFontIndirectA_Hook(LOGFONTA* lplf) {
 	return CreateFontIndirectW(&logfont);
 }
 
+decltype(CharNextA) *_CharNextA = NULL;
+LPSTR WINAPI CharNextA_Hook(LPCSTR lpsz) {
+	return CharNextExA(gCodePage, lpsz, 0);
+}
+
 #define DLL_NAME L"FontChanger"
 bool LoadConfig(HINSTANCE hinstDLL) {
 	Config conf(DLL_NAME".ini", hinstDLL);
@@ -57,6 +65,30 @@ bool FontHook() {
 	SHook(WideCharToMultiByte);
 	SHook(GetACP);
 	SHook(CreateFontIndirectA);
+	SHook(CharNextA);
+	return true;
+}
+
+// Enable utf8 paste for JMS
+decltype(GetClipboardData) *_GetClipboardData = NULL;
+HANDLE WINAPI GetClipboardData_Hook(UINT uFormat) {
+	// CF_TEXT -> CF_OEMTEXT
+	return _GetClipboardData(CF_OEMTEXT);
+}
+
+// Enable IME for MSEA
+decltype(ImmAssociateContext) *_ImmAssociateContext = NULL;
+HIMC WINAPI ImmAssociateContext_Hook(HWND hw, HIMC hi) {
+	if (SimpleHook::IsCallerEXE(_ReturnAddress())) {
+		return 0;
+	}
+
+	return _ImmAssociateContext(hw, hi);
+}
+
+bool ClipBoardHook() {
+	SHook(GetClipboardData);
+	SHook(ImmAssociateContext);
 	return true;
 }
 
@@ -65,6 +97,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 		DisableThreadLibraryCalls(hinstDLL);
 		LoadConfig(hinstDLL);
 		FontHook();
+		//ClipBoardHook();
 	}
 	return TRUE;
 }
