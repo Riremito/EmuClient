@@ -10,7 +10,7 @@
 
 bool RunEmu(std::wstring wDroppedTarget) {
 	Config conf(EXE_NAME".ini");
-	std::wstring wTarget, wLoaderDLL, wMainDLL;
+	std::wstring wTarget, wCmdLine, wLoaderDLL, wMainDLL;
 	bool check = true;
 
 	if (wDroppedTarget.length()) {
@@ -21,6 +21,7 @@ bool RunEmu(std::wstring wDroppedTarget) {
 	}
 
 	check &= conf.Read(EXE_NAME, L"TargetEXE", wTarget);
+	conf.Read(EXE_NAME, L"CmdLine", wCmdLine);
 	check &= conf.Read(EXE_NAME, L"LoaderDLL", wLoaderDLL);
 
 	if (!check) {
@@ -33,7 +34,7 @@ bool RunEmu(std::wstring wDroppedTarget) {
 	}
 
 	Injector injector(wTarget, dir + wLoaderDLL);
-	return injector.Run();
+	return injector.Run(wCmdLine);
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {

@@ -15,13 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EmuLoader.cpp">
+    <ClCompile Include="TimeFix.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="EmuLoader.def">
-      <Filter>ソース ファイル</Filter>
-    </None>
   </ItemGroup>
 </Project>
