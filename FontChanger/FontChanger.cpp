@@ -97,7 +97,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 		DisableThreadLibraryCalls(hinstDLL);
 		LoadConfig(hinstDLL);
 		FontHook();
-		//ClipBoardHook();
+		ClipBoardHook();
 	}
 	return TRUE;
 }
