@@ -37,6 +37,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TimeFix", "TimeFix\TimeFix.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Resizer", "Resizer\Resizer.vcxproj", "{7FB458FC-3758-48B4-95AA-659C19C3D678}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JoyStickFix", "JoyStickFix\JoyStickFix.vcxproj", "{7F76C375-D22B-4BDC-B46B-EBAB50135BD7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -126,6 +128,12 @@ Global
 		{7FB458FC-3758-48B4-95AA-659C19C3D678}.Release|x64.Build.0 = Release|Win32
 		{7FB458FC-3758-48B4-95AA-659C19C3D678}.Release|x86.ActiveCfg = Release|Win32
 		{7FB458FC-3758-48B4-95AA-659C19C3D678}.Release|x86.Build.0 = Release|Win32
+		{7F76C375-D22B-4BDC-B46B-EBAB50135BD7}.Debug|x64.ActiveCfg = Debug|x64
+		{7F76C375-D22B-4BDC-B46B-EBAB50135BD7}.Debug|x86.ActiveCfg = Debug|Win32
+		{7F76C375-D22B-4BDC-B46B-EBAB50135BD7}.Release|x64.ActiveCfg = Release|Win32
+		{7F76C375-D22B-4BDC-B46B-EBAB50135BD7}.Release|x64.Build.0 = Release|Win32
+		{7F76C375-D22B-4BDC-B46B-EBAB50135BD7}.Release|x86.ActiveCfg = Release|Win32
+		{7F76C375-D22B-4BDC-B46B-EBAB50135BD7}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -145,6 +153,7 @@ Global
 		{F65931AD-D4D6-4212-9B47-745B6827B5F9} = {08EA9CF7-04E8-4517-8900-3C0A5D73B539}
 		{133250A7-9E04-4598-9113-08DF0583E9CD} = {08EA9CF7-04E8-4517-8900-3C0A5D73B539}
 		{7FB458FC-3758-48B4-95AA-659C19C3D678} = {08EA9CF7-04E8-4517-8900-3C0A5D73B539}
+		{7F76C375-D22B-4BDC-B46B-EBAB50135BD7} = {08EA9CF7-04E8-4517-8900-3C0A5D73B539}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADCAAC85-E7E1-46A6-989E-A0E379986E0C}
